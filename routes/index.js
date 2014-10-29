@@ -5,6 +5,11 @@ var liftModel = require('../models/lifts');
 var data = JSON.parse(fs.readFileSync('data-init/lifts.json', 'UTF-8'));
 var model = liftModel(data);
 
+var calendarModel = require('../models/calendar');
+var dataE = JSON.parse(fs.readFileSync('data-init/calendar.json', 'UTF-8'));
+var modelEvent = calendarModel(dataE);
+
+
 function printRoute(field, item) {
     if (field == "name") {
         return "/lift/" + item[field].replace(/ /g, "-");
@@ -19,6 +24,24 @@ function printRoute(field, item) {
 
 router.get('/', function (req, res) {
     res.render('index', { title: 'Snowtooth Lift Status API' });
+});
+
+router.get('/events', function (req, res) {
+    modelEvent.fetch(function (events) {
+        if (req.ajax) {
+            res.statusCode = 200;
+            res.json(events);
+        } else {
+            res.render('list', {
+                title: 'All Snowtooth Lifts',
+                description: 'All events at snowtooth along with their status',
+                url: req.url,
+                fields: Object.keys(events[0]),
+                items: events,
+                printRoute: printRoute
+            });
+        }
+    });
 });
 
 router.get('/lifts', function (req, res) {
