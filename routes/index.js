@@ -9,6 +9,12 @@ var calendarModel = require('../models/calendar');
 var dataE = JSON.parse(fs.readFileSync('data-init/calendar.json', 'UTF-8'));
 var modelEvent = calendarModel(dataE);
 
+var request = require('request');
+request('http://www.api.cloud.taipei.gov.tw/CSCP_API/pnc/cei/categories/1/topics', function (error, response, body) {
+  if (!error && response.statusCode == 200) {
+    console.log(body); 
+  }
+})
 
 function printRoute(field, item) {
     if (field == "name") {
