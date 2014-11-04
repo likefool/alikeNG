@@ -1,3 +1,4 @@
+var sqlite3 = require('sqlite3').verbose();
 var request = require('request');
 
 var getLv1 = function(xargs, callback) {
@@ -20,9 +21,25 @@ var getLv2 = function(xargs, callback) {
 	});
 }
 
-for (var cat_id = 1; cat_id <= 1; cat_id++) {
+var db = new sqlite3.Database(':memory:');
+db.serialize(function() {
+    db.run("CREATE TABLE lorem (info TEXT)");
+});
+
+
+var getDB = function() { 
+db.each("SELECT rowid AS id, info FROM lorem", function(err, row) {
+    console.log(row.id + ": " + row.info);
+});
+}
+
+var rowNo = 0;
+var progressNo = 0;
+
+for (var cat_id = 1; cat_id <= 8; cat_id++) {
 getLv1({'cat_id': cat_id}, function(args, eventsL1){
 	//console.log(args.cat_id);
+	rowNo += eventsL1.length;
 	for (var i = 0; i < eventsL1.length; i++) {
 		//var x = [];
 		getLv2({'eventL1': eventsL1[i], 'cat_id': args.cat_id}, function(args, eventsL2){
@@ -36,13 +53,27 @@ getLv1({'cat_id': cat_id}, function(args, eventsL1){
 				all_event.activityImg= eventL1.activityImg;
 				all_event.catId= catId;
 				//topic_events.push(all_event);
-				console.log(all_event.catId + ' : ' + all_event.topicId + ' : ' +all_event.webPageTitle);
+				//console.log(all_event.catId + ' : ' + all_event.topicId + ' : ' +all_event.webPageTitle);
+
+				// insert into db
+				var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+		        stmt.run(all_event.webPageTitle);
+			    stmt.finalize();
+
+			    progressNo ++;
+			    console.log(progressNo+'/'+rowNo);
+			    if (progressNo == rowNo) {
+			    	getDB();
+			    	db.close();
+			    }
 			}
 		});
 	}
 });
 }
-
+ 
+//db.close();
+	
 /*
 new_events.forEach(function(event, index, array){
 	console.log(index + ':' + event.activityImg);
