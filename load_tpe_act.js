@@ -21,8 +21,9 @@ var getLv2 = function(xargs, callback) {
 	});
 }
 
-var db = new sqlite3.Database(':memory:');
+var db = new sqlite3.Database('db/events.db');
 db.serialize(function() {
+    db.run("DROP TABLE IF EXISTS lorem");
     db.run("CREATE TABLE lorem (info TEXT)");
 });
 
@@ -33,10 +34,16 @@ db.each("SELECT rowid AS id, info FROM lorem", function(err, row) {
 });
 }
 
+var addDB = function(eventA) { 
+	var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
+	stmt.run(eventA.webPageTitle);
+	stmt.finalize();
+}
+
 var rowNo = 0;
 var progressNo = 0;
 
-for (var cat_id = 1; cat_id <= 8; cat_id++) {
+for (var cat_id = 1; cat_id <= 1; cat_id++) {
 getLv1({'cat_id': cat_id}, function(args, eventsL1){
 	//console.log(args.cat_id);
 	rowNo += eventsL1.length;
@@ -55,14 +62,18 @@ getLv1({'cat_id': cat_id}, function(args, eventsL1){
 				//topic_events.push(all_event);
 				//console.log(all_event.catId + ' : ' + all_event.topicId + ' : ' +all_event.webPageTitle);
 
+				/*
 				// insert into db
 				var stmt = db.prepare("INSERT INTO lorem VALUES (?)");
 		        stmt.run(all_event.webPageTitle);
 			    stmt.finalize();
+			    */
+			    addDB(all_event);
 
 			    progressNo ++;
 			    console.log(progressNo+'/'+rowNo);
 			    if (progressNo == rowNo) {
+			    	//console.log(all_event);
 			    	getDB();
 			    	db.close();
 			    }
