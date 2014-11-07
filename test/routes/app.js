@@ -4,6 +4,34 @@ var request = require('supertest'),
 
 describe("API Routes", function () {
 
+    it("should load all events", function(done) {
+
+        request(app)
+            .get('/events')
+            .set('Accept', 'application/json')
+            .expect(200)
+            .end(done);
+
+    });
+    it("should load all events for category 1", function(done) {
+
+        request(app)
+            .get('/events/1')
+            .set('Accept', 'application/json')
+            .expect(200)
+            .end(done);
+
+    });
+    it("should load one event", function(done) {
+
+        request(app)
+            .get('/event/29')
+            .set('Accept', 'application/json')
+            .expect(200)
+            .end(done);
+
+    });
+
     it("should load all lifts", function(done) {
 
         request(app)
