@@ -3,6 +3,7 @@ var request = require('request');
 var eventsModel = require('./models/events');
 
 var db = new sqlite3.Database('db/events.db');
+/*
 var eventsInLite = [];
 var i = 0;
 if (1) {
@@ -20,8 +21,8 @@ if (1) {
 	});
 	//throw new Error('Only read');
 }
+*/
 
-/*
 var getLv1 = function(xargs, callback) {
 	request('http://www.api.cloud.taipei.gov.tw/CSCP_API/pnc/cei/categories/' + xargs.cat_id + '/topics' , 
 			function (error, response, body) {
