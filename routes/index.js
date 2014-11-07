@@ -6,8 +6,8 @@ var data = JSON.parse(fs.readFileSync('data-init/lifts.json', 'UTF-8'));
 var model = liftModel(data);
 
 var calendarModel = require('../models/calendar');
-var dataE = JSON.parse(fs.readFileSync('data-init/calendar.json', 'UTF-8'));
-var modelEvent = calendarModel(dataE);
+var dataCal = JSON.parse(fs.readFileSync('data-init/calendar.json', 'UTF-8'));
+var modelCal = calendarModel(dataCal);
 
 /*
 var request = require('request');
@@ -17,6 +17,22 @@ request('http://www.api.cloud.taipei.gov.tw/CSCP_API/pnc/cei/categories/1/topics
   }
 })
 */
+var modelEvent = {};
+var sqlite3 = require('sqlite3').verbose();
+var eventsModel = require('../models/events');
+var db = new sqlite3.Database('./db/events.db');
+var eventsInLite = [];
+db.each("select rowid AS id,* from lorem", function(err, row){
+    //console.log(row.id + ": " + row.activityName);
+    eventsInLite.push(JSON.parse(row.rowJson));
+});
+db.close(function(){
+    //console.log(eventsInLite);        
+    modelEvent = eventsModel(eventsInLite);
+    modelEvent.fetch(function(eventA){
+        console.log('load evnets from sqllite3:'+eventA.length);
+    });
+});
 
 function printRoute(field, item) {
     if (field == "name") {
@@ -35,17 +51,35 @@ router.get('/', function (req, res) {
 });
 
 router.get('/events', function (req, res) {
-    modelEvent.fetch(function (events) {
+    modelCal.fetch(function (eventA) {
         if (req.ajax) {
             res.statusCode = 200;
-            res.json(events);
+            res.json(cals);
         } else {
             res.render('list', {
-                title: 'All Snowtooth Lifts',
+                title: 'All Snowtooth Events',
                 description: 'All events at snowtooth along with their status',
                 url: req.url,
-                fields: Object.keys(events[0]),
-                items: events,
+                fields: Object.keys(eventA[0]),
+                items: eventA,
+                printRoute: printRoute
+            });
+        }
+    });
+});
+
+router.get('/calendar', function (req, res) {
+    modelCal.fetch(function (cals) {
+        if (req.ajax) {
+            res.statusCode = 200;
+            res.json(cals);
+        } else {
+            res.render('list', {
+                title: 'All Snowtooth Calendars',
+                description: 'All Calendars at snowtooth along with their status',
+                url: req.url,
+                fields: Object.keys(cals[0]),
+                items: cals,
                 printRoute: printRoute
             });
         }
